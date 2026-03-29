@@ -119,8 +119,7 @@ function closeLogoutModal() {
  * 3. Clears In-Memory State
  * 4. Reloads page to prevent "Back" button exploits
  */
-async function performLogout() { 
-    localStorage.removeItem("isLoggedIn");
+async function performLogout() {
     const logoutBtn = document.querySelector('#logout-modal .btn-danger');
     logoutBtn.innerText = 'Logging out...';
     logoutBtn.disabled = true;
@@ -856,6 +855,7 @@ function handleAuth(e) {
     const name = document.getElementById("auth-name").value.trim();
     const email = document.getElementById("auth-email").value.trim();
     const password = document.getElementById("auth-password").value.trim();
+    const referralInput = document.getElementById("auth-referral")?.value.trim() || '';
     const confirmPassword = document
         .getElementById("auth-password-confirm")
         .value.trim();
@@ -872,7 +872,13 @@ function handleAuth(e) {
             return;
         }
 
-        const user = { name, email, password };
+        const user = {
+            name: name || 'Learner',
+            email,
+            password,
+            referredBy: referralInput || null,
+            referralCode: generateReferralCode()
+        };
         localStorage.setItem("user", JSON.stringify(user));
 
         alert("Signup successful");
@@ -882,7 +888,6 @@ function handleAuth(e) {
 
     // LOGIN
     const savedUser = JSON.parse(localStorage.getItem("user"));
-    localStorage.setItem("isLoggedIn", "true");
 
     if (!savedUser) {
         alert("No user found. Signup first.");
@@ -895,11 +900,16 @@ function handleAuth(e) {
     ) {
         alert("Login successful");
 
-        document.getElementById("auth-page").classList.remove("active");
-        document.getElementById("dashboard-page").classList.add("active");
+        AppState.user = {
+            name: savedUser.name || 'Learner',
+            email: savedUser.email,
+            referralCode: savedUser.referralCode || generateReferralCode()
+        };
+        AppState.authToken = 'lwr-token-' + Date.now().toString(36);
 
-        document.getElementById("dashboard-username").innerText =
-            "Hello, " + savedUser.name;
+        saveState();
+        updateUI();
+        navigateTo('dashboard-page');
     } else {
         alert("Invalid credentials");
     }
@@ -1704,8 +1714,7 @@ function showToast(message, type = 'success') {
     `;
     container.appendChild(toast);
     setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100px)';
+        toast.classList.add('exit');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
@@ -1803,18 +1812,3 @@ function toggleVoiceInput() {
 
 // Initialize the app
 init();
-
-
-
-window.onload = function () {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if (isLoggedIn === "true" && user) {
-    document.getElementById("auth-page").classList.remove("active");
-    document.getElementById("dashboard-page").classList.add("active");
-
-    document.getElementById("dashboard-username").innerText =
-      "Hello, " + user.name;
-  }
-};
