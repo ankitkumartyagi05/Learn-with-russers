@@ -1,0 +1,1476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learn with Russers - Gamified AI Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+
+  <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Background Animation -->
+    <div class="bg-animation" aria-hidden="true">
+      <div class="bg-blob bg-blob-1"></div>
+      <div class="bg-blob bg-blob-2"></div>
+      <div class="bg-blob bg-blob-3"></div>
+      <div class="grid-pattern"></div>
+    </div>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+      <div class="splash-logo">Learn with Russers</div>
+      <div class="splash-tagline">
+        Learning ka naya style - Game khelo, seekho!
+      </div>
+      <div class="splash-loader">
+        <div class="splash-loader-bar"></div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+    <!-- Confetti Container -->
+    <div
+      class="confetti-container"
+      id="confetti-container"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Anti-cheat Overlay -->
+    <div class="anti-cheat-overlay" id="anti-cheat-overlay">
+      <svg
+        width="80"
+        height="80"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      <h2 style="margin-top: 1.5rem; font-size: 2rem">Test Paused</h2>
+      <p style="margin-top: 1rem; color: var(--fg-secondary); max-width: 400px">
+        Aapne tab switch kiya. Please test tab par wapas aao to continue. Repeat
+        violations will result in automatic test submission.
+      </p>
+      <button
+        class="btn btn-primary btn-large"
+        style="margin-top: 2rem"
+        onclick="resumeTest()"
+      >
+        Resume Test
+      </button>
+    </div>
+
+    <!-- LOGOUT CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="logout-modal">
+      <div class="modal-content" style="max-width: 400px; text-align: center">
+        <div
+          style="
+            width: 60px;
+            height: 60px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+          "
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--error)"
+            stroke-width="2"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </div>
+        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem">
+          Logout Confirm?
+        </h3>
+        <p style="color: var(--fg-secondary); margin-bottom: 2rem">
+          Aap sure hain ki aap logout karna chahte hain? Aapka progress save
+          kiya jayega.
+        </p>
+        <div style="display: flex; gap: 1rem">
+          <button
+            class="btn btn-secondary"
+            style="flex: 1"
+            onclick="closeLogoutModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger"
+            style="flex: 1"
+            onclick="performLogout()"
+          >
+            Yes, Logout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container" id="app">
+      <!-- Auth Page -->
+      <div class="page" id="auth-page">
+        <div
+          class="container"
+          style="
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <div class="card card-glass" style="max-width: 450px; width: 100%">
+            <div style="text-align: center; margin-bottom: 2rem">
+              <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem">
+                Welcome Back!
+              </h1>
+              <p style="color: var(--fg-secondary)">
+                Learning ka naya style - Game khelo, seekho!
+              </p>
+            </div>
+
+            <div
+              id="auth-tabs"
+              style="display: flex; gap: 0.5rem; margin-bottom: 2rem"
+            >
+              <button
+                class="btn btn-secondary"
+                style="flex: 1"
+                id="login-tab"
+                onclick="switchAuthTab('login')"
+              >
+                Login
+              </button>
+              <button
+                class="btn btn-primary"
+                style="flex: 1"
+                id="signup-tab"
+                onclick="switchAuthTab('signup')"
+              >
+                Sign Up
+              </button>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuth(event)">
+              <div class="form-group">
+                <label class="form-label" for="auth-name">Name</label>
+                <input
+                  type="text"
+                  id="auth-name"
+                  class="form-input"
+                  placeholder="Aapka naam"
+                  required
+                />
+              </div>
+
+              <div class="form-group" id="email-group">
+                <label class="form-label" for="auth-email">Email</label>
+                <input
+                  type="email"
+                  id="auth-email"
+                  class="form-input"
+                  placeholder="aapka@email.com"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="auth-password">Password</label>
+                <input
+                  type="password"
+                  id="auth-password"
+                  class="form-input"
+                  placeholder="Secret password"
+                  required
+                  minlength="6"
+                />
+                <small
+                  style="
+                    color: var(--fg-secondary);
+                    font-size: 0.75rem;
+                    margin-top: 0.25rem;
+                  "
+                  >Min 6 characters</small
+                >
+              </div>
+
+              <div
+                class="form-group"
+                id="password-confirm-group"
+                style="display: none"
+              >
+                <label class="form-label" for="auth-password-confirm"
+                  >Confirm Password</label
+                >
+                <input
+                  type="password"
+                  id="auth-password-confirm"
+                  class="form-input"
+                  placeholder="Re-enter password"
+                  minlength="6"
+                />
+              </div>
+
+              <div class="form-group" id="referral-group" style="display: none">
+                <label class="form-label" for="auth-referral"
+                  >Referral Code (Optional)</label
+                >
+                <input
+                  type="text"
+                  id="auth-referral"
+                  class="form-input"
+                  placeholder="FRIEND2024"
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="btn btn-primary btn-large"
+                style="width: 100%"
+              >
+                <span id="auth-btn-text">Start Learning</span>
+              </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem">
+              <button
+                class="btn btn-secondary"
+                onclick="toggleAccessibilityPanel()"
+                style="width: 100%"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4M12 16h.01" />
+                </svg>
+                Accessibility Options
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Detection Quiz Page -->
+      <div class="page" id="quiz-page">
+        <div class="page-header">
+          <div>
+            <h2 style="font-size: 1.25rem">Level Detection</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Let's find your starting point
+            </p>
+          </div>
+          <div class="xp-badge">
+            <span>Question</span>
+            <span class="xp-value" id="quiz-progress">1/5</span>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 2rem; max-width: 700px">
+            <div class="progress-bar" style="margin-bottom: 2rem">
+              <div
+                class="progress-fill"
+                id="quiz-progress-bar"
+                style="width: 20%"
+              ></div>
+            </div>
+
+            <div class="card" id="quiz-card">
+              <h3
+                style="font-size: 1.25rem; margin-bottom: 1.5rem"
+                id="quiz-question"
+              >
+                Programming mein "variable" kya hota hai?
+              </h3>
+
+              <div
+                style="display: flex; flex-direction: column; gap: 0.75rem"
+                id="quiz-options"
+              >
+                <!-- Options will be dynamically added -->
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
+              <button
+                class="btn btn-secondary"
+                onclick="skipQuiz()"
+                style="flex: 1"
+              >
+                Skip for Now
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="nextQuizQuestion()"
+                style="flex: 1"
+                id="quiz-next-btn"
+                disabled
+              >
+                Next Question
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Page -->
+      <div class="page" id="dashboard-page">
+        <div class="page-header">
+          <div style="display: flex; align-items: center; gap: 1rem">
+            <div class="level-badge" id="user-level-badge">1</div>
+            <div>
+              <h2 style="font-size: 1.25rem" id="dashboard-username">
+                Hello, Learner!
+              </h2>
+              <p style="color: var(--fg-secondary); font-size: 0.875rem">
+                Aaj ka din seekhne ke liye ready?
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem">
+            <div class="streak-container">
+              <span class="streak-flame">&#128293;</span>
+              <span id="user-streak">0</span>
+            </div>
+
+            <!-- Logout Button -->
+            <button
+              class="btn btn-icon btn-secondary"
+              onclick="requestLogout()"
+              aria-label="Logout"
+              title="Logout"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+
+            <button
+              class="btn btn-icon btn-secondary"
+              onclick="toggleAccessibilityPanel()"
+              aria-label="Accessibility options"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem">
+            <!-- Daily Progress -->
+            <div class="card stagger-1" style="margin-bottom: 1.5rem">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <h3 style="font-size: 1rem">Today's Progress</h3>
+                <span class="xp-badge">
+                  <span>XP</span>
+                  <span class="xp-value" id="user-xp">0</span>
+                </span>
+              </div>
+              <div class="level-progress-container">
+                <span style="font-size: 0.875rem; color: var(--fg-secondary)"
+                  >Level <span id="current-level">1</span></span
+                >
+                <div class="level-progress-bar">
+                  <div
+                    class="level-progress-fill"
+                    id="level-progress"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <span style="font-size: 0.875rem; color: var(--fg-secondary)"
+                  >Level <span id="next-level">2</span></span
+                >
+              </div>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--fg-secondary);
+                  margin-top: 0.75rem;
+                  text-align: center;
+                "
+              >
+                <span id="xp-needed">100</span> XP needed for next level
+              </p>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="stats-grid stagger-2" style="margin-bottom: 1.5rem">
+              <div
+                class="stat-card glow-effect"
+                style="cursor: pointer"
+                onclick="navigateTo('learning-page')"
+              >
+                <div class="stat-value" id="lessons-completed">0</div>
+                <div class="stat-label">Lessons Done</div>
+              </div>
+              <div
+                class="stat-card glow-effect"
+                style="cursor: pointer"
+                onclick="navigateTo('practice-page')"
+              >
+                <div class="stat-value" id="practice-completed">0</div>
+                <div class="stat-label">Practice Done</div>
+              </div>
+              <div
+                class="stat-card glow-effect"
+                style="cursor: pointer"
+                onclick="navigateTo('rewards-page')"
+              >
+                <div class="stat-value" id="rewards-earned">0</div>
+                <div class="stat-label">Rewards</div>
+              </div>
+            </div>
+
+            <!-- Continue Learning -->
+            <div class="card stagger-3" style="margin-bottom: 1.5rem">
+              <h3 style="font-size: 1rem; margin-bottom: 1rem">
+                Continue Learning
+              </h3>
+              <div id="current-topics">
+                <!-- Topics will be dynamically added -->
+              </div>
+            </div>
+
+            <!-- Daily Challenges -->
+            <div class="card stagger-4" style="margin-bottom: 1.5rem">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 1rem;
+                "
+              >
+                <h3 style="font-size: 1rem">Daily Challenges</h3>
+                <span style="color: var(--fg-secondary); font-size: 0.875rem"
+                  >Resets in <span id="challenge-timer">23:45:12</span></span
+                >
+              </div>
+              <div id="daily-challenges">
+                <!-- Challenges will be dynamically added -->
+              </div>
+            </div>
+
+            <!-- Weekly Streak -->
+            <div class="card stagger-5">
+              <h3 style="font-size: 1rem; margin-bottom: 1rem">This Week</h3>
+              <div class="streak-calendar" id="streak-calendar">
+                <!-- Days will be dynamically added -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Learning Page -->
+      <div class="page" id="learning-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div style="flex: 1; text-align: center">
+            <h2 style="font-size: 1rem" id="lesson-title">
+              Introduction to Variables
+            </h2>
+            <div
+              class="progress-bar"
+              style="
+                margin-top: 0.5rem;
+                width: 150px;
+                margin-left: auto;
+                margin-right: auto;
+              "
+            >
+              <div
+                class="progress-fill"
+                id="lesson-progress"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+          <div
+            class="voice-indicator"
+            id="voice-btn-learning"
+            onclick="toggleVoiceAssistant()"
+            aria-label="Voice assistant"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+            >
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem; max-width: 800px">
+            <div class="card" style="margin-bottom: 1.5rem">
+              <div class="lesson-content" id="lesson-content">
+                <!-- Lesson content will be dynamically loaded -->
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem">
+              <button
+                class="btn btn-secondary"
+                onclick="previousLesson()"
+                style="flex: 1"
+                id="prev-lesson-btn"
+              >
+                Previous
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="nextLesson()"
+                style="flex: 1"
+                id="next-lesson-btn"
+              >
+                Next Lesson
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Practice Page -->
+      <div class="page" id="practice-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-size: 1.25rem">Practice</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Ek ek question solve karo
+            </p>
+          </div>
+          <div class="xp-badge">
+            <span>Score</span>
+            <span class="xp-value" id="practice-score">0</span>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem; max-width: 700px">
+            <div class="progress-bar" style="margin-bottom: 1.5rem">
+              <div
+                class="progress-fill"
+                id="practice-progress"
+                style="width: 10%"
+              ></div>
+            </div>
+
+            <div class="card" id="practice-card" style="margin-bottom: 1.5rem">
+              <h3
+                style="font-size: 1.25rem; margin-bottom: 1.5rem"
+                id="practice-question"
+              >
+                <!-- Question will be loaded dynamically -->
+              </h3>
+
+              <div
+                style="display: flex; flex-direction: column; gap: 0.75rem"
+                id="practice-options"
+              >
+                <!-- Options will be dynamically added -->
+              </div>
+
+              <div
+                id="practice-feedback"
+                style="
+                  margin-top: 1.5rem;
+                  padding: 1rem;
+                  border-radius: 12px;
+                  display: none;
+                "
+              >
+                <!-- Feedback will be shown here -->
+              </div>
+            </div>
+
+            <button
+              class="btn btn-primary btn-large"
+              style="width: 100%"
+              onclick="nextPracticeQuestion()"
+              id="practice-next-btn"
+              disabled
+            >
+              Next Question
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Chat Page -->
+      <div class="page" id="chat-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-size: 1.25rem">AI Tutor</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Koi bhi doubt puchiye
+            </p>
+          </div>
+          <div
+            class="voice-indicator"
+            id="voice-btn-chat"
+            onclick="toggleVoiceInput()"
+            aria-label="Voice input"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+            >
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="chat-container">
+            <div
+              class="chat-messages"
+              id="chat-messages"
+              role="log"
+              aria-live="polite"
+            >
+              <div class="chat-message ai">
+                <p>
+                  Namaste! Main aapka AI Tutor hoon. Aap mujhse koi bhi doubt
+                  pooch sakte ho. Main aapko Hinglish mein samjhaonga. Batao,
+                  kya seekhna chahte ho?
+                </p>
+              </div>
+            </div>
+            <div class="chat-input-container">
+              <textarea
+                class="chat-input"
+                id="chat-input"
+                placeholder="Apna doubt yahan likho..."
+                rows="1"
+                onkeydown="handleChatKeydown(event)"
+              ></textarea>
+              <button
+                class="btn btn-primary"
+                onclick="sendMessage()"
+                aria-label="Send message"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rewards Page -->
+      <div class="page" id="rewards-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-size: 1.25rem">Rewards</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Apne rewards unlock karo
+            </p>
+          </div>
+          <div class="xp-badge">
+            <span>XP</span>
+            <span class="xp-value" id="rewards-xp">0</span>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem">
+            <div id="rewards-list">
+              <!-- Rewards will be dynamically added -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Referral Page -->
+      <div class="page" id="referral-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-size: 1.25rem">Invite Friends</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Dosto ko invite karo, rewards jeeto
+            </p>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem; max-width: 600px">
+            <div class="card" style="margin-bottom: 1.5rem">
+              <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem">
+                Your Referral Code
+              </h3>
+              <p style="color: var(--fg-secondary); margin-bottom: 1rem">
+                Is code ko dosto ke saath share karo. Jab wo signup karenge,
+                dono ko 100 XP milenge!
+              </p>
+              <div class="referral-box">
+                <p style="font-size: 0.875rem; color: var(--fg-secondary)">
+                  Your Code
+                </p>
+                <div class="referral-code" id="referral-code">LEARN2024</div>
+                <button class="btn btn-secondary" onclick="copyReferralCode()">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path
+                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                    />
+                  </svg>
+                  Copy Code
+                </button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 style="font-size: 1.25rem; margin-bottom: 1rem">
+                Referral Stats
+              </h3>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-value" id="referrals-sent">0</div>
+                  <div class="stat-label">Invited</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="referrals-joined">0</div>
+                  <div class="stat-label">Joined</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-value" id="referral-earnings">0</div>
+                  <div class="stat-label">XP Earned</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Page -->
+      <div class="page" id="test-page">
+        <div class="page-header">
+          <div>
+            <h2 style="font-size: 1.25rem">Final Assessment</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Test your knowledge
+            </p>
+          </div>
+        </div>
+
+        <div class="test-timer" id="test-timer">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span id="timer-display">30:00</span>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 6rem; max-width: 700px">
+            <div class="progress-bar" style="margin-bottom: 1.5rem">
+              <div
+                class="progress-fill"
+                id="test-progress"
+                style="width: 10%"
+              ></div>
+            </div>
+
+            <div class="card" id="test-card" style="margin-bottom: 1.5rem">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  margin-bottom: 1rem;
+                "
+              >
+                <span style="color: var(--fg-secondary)"
+                  >Question <span id="test-current">1</span> of
+                  <span id="test-total">10</span></span
+                >
+                <span style="color: var(--fg-secondary)"
+                  >Marks: <span id="test-marks">1</span></span
+                >
+              </div>
+
+              <h3
+                style="font-size: 1.25rem; margin-bottom: 1.5rem"
+                id="test-question"
+              >
+                <!-- Question will be loaded dynamically -->
+              </h3>
+
+              <div
+                style="display: flex; flex-direction: column; gap: 0.75rem"
+                id="test-options"
+              >
+                <!-- Options will be dynamically added -->
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem">
+              <button
+                class="btn btn-secondary"
+                onclick="skipTestQuestion()"
+                style="flex: 1"
+              >
+                Skip
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="nextTestQuestion()"
+                style="flex: 1"
+                id="test-next-btn"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificate Page -->
+      <div class="page" id="certificate-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-size: 1.25rem">Certificate</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Your achievement
+            </p>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem; max-width: 800px">
+            <div
+              class="certificate-preview"
+              id="certificate-preview"
+              style="margin-bottom: 1.5rem"
+            >
+              <div style="position: relative; z-index: 1">
+                <h1
+                  style="
+                    font-size: 2rem;
+                    margin-bottom: 0.5rem;
+                    background: linear-gradient(
+                      135deg,
+                      var(--gradient-start),
+                      var(--gradient-end)
+                    );
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                  "
+                >
+                  Certificate of Completion
+                </h1>
+                <p style="color: var(--fg-secondary); margin-bottom: 2rem">
+                  This is to certify that
+                </p>
+                <h2
+                  style="font-size: 2.5rem; margin-bottom: 2rem"
+                  id="certificate-name"
+                >
+                  Learner Name
+                </h2>
+                <p style="color: var(--fg-secondary); margin-bottom: 1rem">
+                  has successfully completed the course
+                </p>
+                <h3
+                  style="font-size: 1.5rem; margin-bottom: 2rem"
+                  id="certificate-course"
+                >
+                  Introduction to Programming
+                </h3>
+                <p style="color: var(--fg-secondary); margin-bottom: 0.5rem">
+                  on <span id="certificate-date">January 1, 2025</span>
+                </p>
+                <p style="color: var(--fg-muted); font-size: 0.875rem">
+                  Certificate ID:
+                  <span id="certificate-id">CERT-XXXX-XXXX</span>
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem">
+              <button
+                class="btn btn-primary btn-large"
+                style="flex: 1"
+                onclick="downloadCertificate()"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download Certificate
+              </button>
+              <button
+                class="btn btn-secondary btn-large"
+                onclick="shareCertificate()"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                Share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Career Page -->
+      <div class="page" id="career-page">
+        <div class="page-header">
+          <button
+            class="btn btn-icon btn-secondary"
+            onclick="goBack()"
+            aria-label="Go back"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h2 style="font-size: 1.25rem">Career Paths</h2>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Your personalized suggestions
+            </p>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="container" style="padding-top: 1.5rem">
+            <div class="card" style="margin-bottom: 1.5rem">
+              <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem">
+                You Are Ready!
+              </h3>
+              <p style="color: var(--fg-secondary)">
+                Aapki learning progress ke hisaab se, humne aapke liye best
+                career paths suggest kiye hain.
+              </p>
+            </div>
+
+            <div id="career-list">
+              <!-- Career cards will be dynamically added -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <nav
+        class="nav-bottom"
+        id="bottom-nav"
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        <button
+          class="nav-item active"
+          onclick="navigateTo('dashboard-page')"
+          aria-label="Home"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          <span>Home</span>
+        </button>
+        <button
+          class="nav-item"
+          onclick="navigateTo('learning-page')"
+          aria-label="Learn"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          <span>Learn</span>
+        </button>
+        <button
+          class="nav-item"
+          onclick="navigateTo('practice-page')"
+          aria-label="Practice"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+            />
+          </svg>
+          <span>Practice</span>
+        </button>
+        <button
+          class="nav-item"
+          onclick="navigateTo('chat-page')"
+          aria-label="AI Tutor"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+            />
+          </svg>
+          <span>AI Tutor</span>
+        </button>
+        <button
+          class="nav-item"
+          onclick="navigateTo('rewards-page')"
+          aria-label="Rewards"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="8" r="7" />
+            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+          </svg>
+          <span>Rewards</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Accessibility Panel -->
+    <div
+      class="accessibility-panel"
+      id="accessibility-panel"
+      role="dialog"
+      aria-label="Accessibility options"
+    >
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2rem;
+        "
+      >
+        <h3 style="font-size: 1.25rem">Accessibility</h3>
+        <button
+          class="btn btn-icon btn-secondary"
+          onclick="toggleAccessibilityPanel()"
+          aria-label="Close accessibility panel"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1.5rem">
+        <!-- Theme Toggle -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem">Dark Mode</h4>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Eye comfort ke liye
+            </p>
+          </div>
+          <div
+            class="toggle-switch active"
+            id="theme-toggle"
+            onclick="toggleTheme()"
+            role="switch"
+            aria-checked="true"
+            tabindex="0"
+          ></div>
+        </div>
+
+        <!-- Large Fonts -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem">Large Fonts</h4>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Bada text, better readability
+            </p>
+          </div>
+          <div
+            class="toggle-switch"
+            id="fonts-toggle"
+            onclick="toggleLargeFonts()"
+            role="switch"
+            aria-checked="false"
+            tabindex="0"
+          ></div>
+        </div>
+
+        <!-- High Contrast -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem">
+              High Contrast
+            </h4>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Better visibility
+            </p>
+          </div>
+          <div
+            class="toggle-switch"
+            id="contrast-toggle"
+            onclick="toggleHighContrast()"
+            role="switch"
+            aria-checked="false"
+            tabindex="0"
+          ></div>
+        </div>
+
+        <!-- Reduced Motion -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem">
+              Reduced Motion
+            </h4>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Kam animations
+            </p>
+          </div>
+          <div
+            class="toggle-switch"
+            id="motion-toggle"
+            onclick="toggleReducedMotion()"
+            role="switch"
+            aria-checked="false"
+            tabindex="0"
+          ></div>
+        </div>
+
+        <!-- Eye Comfort -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem">Eye Comfort</h4>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Reduced brightness
+            </p>
+          </div>
+          <div
+            class="toggle-switch"
+            id="eye-toggle"
+            onclick="toggleEyeComfort()"
+            role="switch"
+            aria-checked="false"
+            tabindex="0"
+          ></div>
+        </div>
+
+        <!-- Text to Speech -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem">
+              Text to Speech
+            </h4>
+            <p style="color: var(--fg-secondary); font-size: 0.875rem">
+              Content sunao
+            </p>
+          </div>
+          <div
+            class="toggle-switch"
+            id="tts-toggle"
+            onclick="toggleTTS()"
+            role="switch"
+            aria-checked="false"
+            tabindex="0"
+          ></div>
+        </div>
+      </div>
+
+      <div
+        style="
+          margin-top: 2rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--border);
+        "
+      >
+        <button
+          class="btn btn-secondary"
+          style="width: 100%"
+          onclick="speakText('Accessibility settings saved successfully!')"
+        >
+          Test Voice
+        </button>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      // Set this value in your frontend deployment for separate backend hosting.
+      // Example: https://api.learnwithrussers.com/api/v1
+      window.LWR_API_BASE_URL = window.LWR_API_BASE_URL || "";
+    </script>
+    <script src="assets/js/scripts.js"></script>
+  </body>
+</html>
