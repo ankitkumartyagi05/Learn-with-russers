@@ -1635,3 +1635,4 @@ h6 {
   opacity: 0;
   animation: fadeSlideUp 0.5s ease forwards;
 }
+.toast.exit { animation: toastSlideOut 0.3s ease forwards; } @keyframes toastSlideOut { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(100px); } }
