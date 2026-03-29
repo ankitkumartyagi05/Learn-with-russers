@@ -119,7 +119,8 @@ function closeLogoutModal() {
  * 3. Clears In-Memory State
  * 4. Reloads page to prevent "Back" button exploits
  */
-async function performLogout() {
+async function performLogout() { 
+    localStorage.removeItem("isLoggedIn");
     const logoutBtn = document.querySelector('#logout-modal .btn-danger');
     logoutBtn.innerText = 'Logging out...';
     logoutBtn.disabled = true;
@@ -881,6 +882,7 @@ function handleAuth(e) {
 
     // LOGIN
     const savedUser = JSON.parse(localStorage.getItem("user"));
+    localStorage.setItem("isLoggedIn", "true");
 
     if (!savedUser) {
         alert("No user found. Signup first.");
@@ -1801,3 +1803,18 @@ function toggleVoiceInput() {
 
 // Initialize the app
 init();
+
+
+
+window.onload = function () {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (isLoggedIn === "true" && user) {
+    document.getElementById("auth-page").classList.remove("active");
+    document.getElementById("dashboard-page").classList.add("active");
+
+    document.getElementById("dashboard-username").innerText =
+      "Hello, " + user.name;
+  }
+};
