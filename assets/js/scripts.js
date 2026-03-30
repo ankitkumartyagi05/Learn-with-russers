@@ -24,7 +24,7 @@ const PUBLIC_ROUTES = ['auth-page', 'quiz-page'];
 const DEPLOY_API_BASE_URL = (window.LWR_API_BASE_URL || '').trim();
 const API_BASE_URL = DEPLOY_API_BASE_URL
     || (window.location.protocol === 'file:'
-        ? 'http://127.0.0.1:8000/api/v1'
+        ? 'https://learn-with-russers-backend.vercel.app/'
         : `${window.location.origin}/api/v1`);
 
 async function apiRequest(endpoint, options = {}) {
